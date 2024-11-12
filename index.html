@@ -1,7 +1,6 @@
 <!doctype html>
 <html>
-<head>    
-    <script src="https://aframe.io/releases/1.0.4/aframe.min.js"></script>
+<head>    <script src="https://aframe.io/releases/1.0.4/aframe.min.js"></script>
     <script src="https://raw.githack.com/AR-js-org/AR.js/master/aframe/build/aframe-ar.js"></script>
     <script src="https://raw.githack.com/AR-js-org/studio-backend/master/src/modules/marker/tools/gesture-detector.js"></script>
     <script src="https://raw.githack.com/AR-js-org/studio-backend/master/src/modules/marker/tools/gesture-handler.js"></script>
@@ -43,7 +42,7 @@
         #snap {
             max-width: 100%;
             height: auto;
-            display: block;
+            display: block;;
             visibility: hidden;
         }
         .ui a.disabled {
@@ -63,7 +62,6 @@
         arjs="trackingMethod: best; sourceType: webcam; debugUIEnabled: false;"
         id="scene"
         embedded
-        screenshot="width: 1280; height: 720"
         gesture-detector
     >
         <a-marker
@@ -121,12 +119,15 @@
             resizedCanvas.height = height;
             resizedContext.drawImage(video, 0, 0, width, height);
 
-            // 横長（PC)
             if (width > height) {
+                // 横長（PC)
                 resizedContext.drawImage(aScene, 0, 0, width, height);
             } else {
-                // 縦長（スマホ）の場合はキャンバスを調整
-                resizedContext.drawImage(aScene, 0, 0, width, height);
+                // 縦長（スマホ）
+                var scale = height / width;
+                var scaledWidth = height * scale;
+                var marginLeft = (width - scaledWidth) / 2;
+                resizedContext.drawImage(aScene, marginLeft, 0, scaledWidth, height);
             }
 
             return resizedCanvas.toDataURL('image/png');
@@ -136,24 +137,10 @@
     // スナップショットを自動的にダウンロード
     function downloadSnapshot(dataUrl) {
         var a = document.createElement('a');
-
-        // 現在の日時を取得
-        var now = new Date();
-        var year = now.getFullYear();
-        var month = ('0' + (now.getMonth() + 1)).slice(-2); // 月を2桁にする
-        var day = ('0' + now.getDate()).slice(-2);          // 日を2桁にする
-        var hours = ('0' + now.getHours()).slice(-2);       // 時間を2桁にする
-        var minutes = ('0' + now.getMinutes()).slice(-2);   // 分を2桁にする
-        var seconds = ('0' + now.getSeconds()).slice(-2);   // 秒を2桁にする
-        var randomNum = Math.floor(Math.random() * 100);    // 0〜99のランダムな数字を生成
-
-        // ファイル名を指定（ARcue-tah_年月日＋時刻＋数字）
-        var fileName = `ARcue-tah_${year}年${month}月${day}日_${hours}時${minutes}分${seconds}秒_${randomNum}.png`;
-
         a.href = dataUrl;
-        a.download = fileName;  // ダウンロードファイル名をセット
+        a.download = 'snapshot.png';
         document.body.appendChild(a);
-        a.click();  // ダウンロードを実行
+        a.click();
         document.body.removeChild(a);
     }
 
