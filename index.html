@@ -1,5 +1,4 @@
-<!doctype html>
-<html>
+html>
 <head>
     <script src="https://aframe.io/releases/1.0.4/aframe.min.js"></script>
     <script src="https://raw.githack.com/AR-js-org/AR.js/master/aframe/build/aframe-ar.js"></script>
@@ -43,7 +42,7 @@
         #snap {
             max-width: 100%;
             height: auto;
-            display: block;
+            display: block;;
             visibility: hidden;
         }
         .ui a.disabled {
@@ -64,7 +63,6 @@
         id="scene"
         embedded
         gesture-detector
-        screenshot="width: 1280; height: 720;"
     >
         <a-marker
             id="animated-marker"
@@ -78,7 +76,7 @@
         >
             <a-image
                 src="assets/asset.png"
-                scale="5 5 2"
+                scale="6 6 2"
                 class="clickable"
                 rotation="-90 0 0"
                 position="1 0 0"
@@ -90,55 +88,67 @@
     <div class="ui">
         <a href="#" id="take-photo" title="Take Photo"><img src="assets/camera.png" alt="Take Photo"></a>
     </div>
-
-    <script>
-        var take_photo_btn = document.querySelector('#take-photo');
-
-        // スナップショットボタン
-        take_photo_btn.addEventListener("click", function (e) {
-            e.preventDefault();
-
-            // A-Frameのシーンからスナップショットを取得
-            var aScene = document.querySelector("a-scene");
-            var snap = aScene.components.screenshot.getCanvas("perspective").toDataURL('image/png');
-
-            // 自動保存処理
-            downloadSnapshot(snap);
-            
-            // カメラ状態に戻す（UI初期化）
-            resetCamera();
-        });
-
-        // スナップショットを自動的にダウンロード
-        function downloadSnapshot(dataUrl) {
-            var a = document.createElement('a');
-
-            // 現在の日時を取得
-            var now = new Date();
-            var year = now.getFullYear();
-            var month = ('0' + (now.getMonth() + 1)).slice(-2); // 月を2桁にする
-            var day = ('0' + now.getDate()).slice(-2);          // 日を2桁にする
-            var hours = ('0' + now.getHours()).slice(-2);       // 時間を2桁にする
-            var minutes = ('0' + now.getMinutes()).slice(-2);   // 分を2桁にする
-            var seconds = ('0' + now.getSeconds()).slice(-2);   // 秒を2桁にする
-            var randomNum = Math.floor(Math.random() * 100);    // 0〜99のランダムな数字を生成
-
-            // ファイル名を指定（ARcue-tah_年月日＋時刻＋数字）
-            var fileName = `ARcue-tah_${year}年${month}月${day}日_${hours}時${minutes}分${seconds}秒_${randomNum}.png`;
-
-            a.href = dataUrl;
-            a.download = fileName;  // ダウンロードファイル名をセット
-            document.body.appendChild(a);
-            a.click();  // ダウンロードを実行
-            document.body.removeChild(a);
-        }
-
-        // カメラ状態に戻す（UIの初期化）
-        function resetCamera() {
-            var image = document.querySelector('#snap');
-            image.setAttribute('src', "");  // スナップショットをクリア
-            image.classList.remove('visible');  // スナップショットを非表示
-        }
-    </script>
 </body>
+
+<script>
+    var take_photo_btn = document.querySelector('#take-photo');
+
+    // スナップショットボタン
+    take_photo_btn.addEventListener("click", function (e) {
+        e.preventDefault();
+        var video = document.querySelector('video');
+        var snap = takeSnapshot(video);
+
+        // 自動保存処理
+        downloadSnapshot(snap);
+        
+        // カメラ状態に戻す（UI初期化）
+        resetCamera();
+    });
+
+    // スナップショットを撮る
+    function takeSnapshot(video) {
+        var resizedCanvas = document.createElement("canvas");
+        var resizedContext = resizedCanvas.getContext("2d");
+        var width = video.videoWidth;
+        var height = video.videoHeight;
+        var aScene = document.querySelector("a-scene").components.screenshot.getCanvas("perspective");
+
+        if (width && height) {
+            resizedCanvas.width = width;
+            resizedCanvas.height = height;
+            resizedContext.drawImage(video, 0, 0, width, height);
+
+            if (width > height) {
+                // 横長（PC)
+                resizedContext.drawImage(aScene, 0, 0, width, height);
+            } else {
+                // 縦長（スマホ）
+                var scale = height / width;
+                var scaledWidth = height * scale;
+                var marginLeft = (width - scaledWidth) / 2;
+                resizedContext.drawImage(aScene, marginLeft, 0, scaledWidth, height);
+            }
+
+            return resizedCanvas.toDataURL('image/png');
+        }
+    }
+
+    // スナップショットを自動的にダウンロード
+    function downloadSnapshot(dataUrl) {
+        var a = document.createElement('a');
+        a.href = dataUrl;
+        a.download = 'snapshot.png';
+        document.body.appendChild(a);
+        a.click();
+        document.body.removeChild(a);
+    }
+
+    // カメラ状態に戻す（UIの初期化）
+    function resetCamera() {
+        var image = document.querySelector('#snap');
+        image.setAttribute('src', "");  // スナップショットをクリア
+        image.classList.remove('visible');  // スナップショットを非表示
+    }
+</script>
 </html>
