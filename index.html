@@ -136,14 +136,28 @@
     }
 
     // スナップショットを自動的にダウンロード
-    function downloadSnapshot(dataUrl) {
-        var a = document.createElement('a');
-        a.href = dataUrl;
-        a.download = 'snapshot.png';
-        document.body.appendChild(a);
-        a.click();
-        document.body.removeChild(a);
-    }
+function downloadSnapshot(dataUrl) {
+    var a = document.createElement('a');
+
+    // 現在の日時を取得
+    var now = new Date();
+    var year = now.getFullYear();
+    var month = ('0' + (now.getMonth() + 1)).slice(-2); // 月を2桁にする
+    var day = ('0' + now.getDate()).slice(-2);          // 日を2桁にする
+    var hours = ('0' + now.getHours()).slice(-2);       // 時間を2桁にする
+    var minutes = ('0' + now.getMinutes()).slice(-2);   // 分を2桁にする
+    var seconds = ('0' + now.getSeconds()).slice(-2);   // 秒を2桁にする
+    var randomNum = Math.floor(Math.random() * 100);    // 0〜99のランダムな数字を生成
+
+    // ファイル名を指定（ARcue-tah_年月日＋時刻＋数字）
+    var fileName = `ARcue-tah_${year}年${month}月${day}日_${hours}時${minutes}分${seconds}秒_${randomNum}.png`;
+
+    a.href = dataUrl;
+    a.download = fileName;  // ダウンロードファイル名をセット
+    document.body.appendChild(a);
+    a.click();  // ダウンロードを実行
+    document.body.removeChild(a);
+}
 
     // カメラ状態に戻す（UIの初期化）
     function resetCamera() {
