@@ -92,6 +92,7 @@
 
 <script>
     var take_photo_btn = document.querySelector('#take-photo');
+    var snapshotCounter = 1;  // 数字カウンター
 
     // スナップショットボタン
     take_photo_btn.addEventListener("click", function (e) {
@@ -138,7 +139,21 @@
     function downloadSnapshot(dataUrl) {
         var a = document.createElement('a');
         a.href = dataUrl;
-        a.download = 'snapshot.png';
+
+        // 現在の日付と時刻を取得
+        var now = new Date();
+        var year = now.getFullYear();
+        var month = ('0' + (now.getMonth() + 1)).slice(-2);
+        var day = ('0' + now.getDate()).slice(-2);
+        var hours = ('0' + now.getHours()).slice(-2);
+        var minutes = ('0' + now.getMinutes()).slice(-2);
+        var seconds = ('0' + now.getSeconds()).slice(-2);
+
+        // ファイル名を「que-tah+年月日+時刻+数字」の形式で作成
+        var filename = `que-tah_${year}${month}${day}_${hours}${minutes}${seconds}_${snapshotCounter}.png`;
+
+        a.download = filename;  // 生成されたファイル名を設定
+        snapshotCounter++;  // カウンターをインクリメント
         document.body.appendChild(a);
         a.click();
         document.body.removeChild(a);
@@ -151,4 +166,3 @@
         image.classList.remove('visible');  // スナップショットを非表示
     }
 </script>
-</html>
